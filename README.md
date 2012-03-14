@@ -6,7 +6,7 @@ A Google App Engine (GAE) Python db.ListProperty subclassed to store a list of s
 
 ObjectListProperty optionally uses 'serialize' and 'deserialize' methods from the item class if they exist, otherwise a JSON representation of the item's internal dict is used.  These methods should be implemented if the class has attributes that are not builtin types.
 
-# Raison d'être
+## Raison d'être
 
 Often your GAE model needs a list of simple objects.  The general solution to storing these is to use parallel db.ListProperty's and manage both lists simultaneously. ObjectListProperty is a more elegant solution: it uses one ListProperty that stores a serialized version of your object.
 
@@ -33,10 +33,12 @@ Tested on Google App Engine Python SDK 1.6.3
 
 ## Release History
 
-0.2 - (3/14/2012) Added internal serialization using json and __dict__
+0.2 - (3/14/2012) Added internal serialization using json and `__dict__`
+
 0.1 - (2/20/2012) First public version
 
 ## License
 
 Copyright (c) Fraser Harris, 2012
+
 No restrictions on usage.
