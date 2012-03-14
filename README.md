@@ -1,48 +1,42 @@
+# ObjectListProperty - a flexible list property for App Engine
+
+Version: 0.2, last updated Mar. 14, 2012
+
+A Google App Engine (GAE) Python db.ListProperty subclassed to store a list of serializable class instances. Serialization / deserialization are done transparently when putting and getting. This is a paramaterized property; the parameter must be a class with serializable members.
+
+ObjectListProperty optionally uses 'serialize' and 'deserialize' methods from the item class if they exist, otherwise a JSON representation of the item's internal dict is used.  These methods should be implemented if the class has attributes that are not builtin types.
+
 # Raison d'être
 
-Often your Google App Engine (GAE) model needs a list of simple objects.  The general solution to storing these is to use parallel db.ListProperty's and manage both lists simultaneously. ObjectListProperty is a more elegant solution: it uses one ListProperty that stores a serialized version of your object.
-
-# ObjectListProperty
-
-A GAE db.ListProperty subclassed to store a list of serializable class instances. Serialization / deserialization are done transparently when putting and getting
-
-This is a paramaterized property; the parameter must be a class with 'serialize' and 'deserialize' methods, and all items must conform to this type.
+Often your GAE model needs a list of simple objects.  The general solution to storing these is to use parallel db.ListProperty's and manage both lists simultaneously. ObjectListProperty is a more elegant solution: it uses one ListProperty that stores a serialized version of your object.
 
 ## Gotchas
 
 Maximum serialized string length of 500 characters. For longer strings, change line with #! comment: 'str' -> 'db.Text' and deal with encoding / decoding
 
-## Example
+## Examples
 
-    from object_list_property import ObjectListProperty
-    
-    class Record:
-      """ Our example object class, with methods serialize and deserialize.
-      This stores a reference to an assumed user model and a timestamp of
-      when the record was first created.
-
-      Inputs:
-        who: an assumed user model that has a db.Key
-      """
-      separator_char = '@'
-
-      def __init__(self, who, timestamp=None):
-        self.who = who.key() if hasattr(who, 'key') else who
-        # If timestamp doesn't exist, set it to now
-        self.timestamp = timestamp if timestamp else time.time()
-    
-      def serialize(self):
-        return "%s%s%s" % (str(self.who), separator_char, str(self.time))
-    
-      @classmethod
-      def deserialize(cls, value):
-        [ who, timestamp ] = value.split(separator_char, 1)
-        return cls(who= db.Key(who), timestamp= float(timestamp))
+    class Record():
+        """ A simple object that we want to store with our model """
+        def __init__(self, who, timestamp=None):
+            self.who = who.key() if hasattr(who, 'key') else who # Some user model
+            self.timestamp = timestamp if timestamp else time.time()
     
     class Usage_Tracker(db.Model):
-      records = ObjectListProperty(Record, indexed=False)
-    
-    # Assuming some User model instance 'user' exists
-    usage_tracker = db.Query(Usage_Tracker).get()
-    usage_tracker.records.append(Record(user))
-    usage_tracker.put()
+        records = ObjectListProperty(Record, indexed=False)
+
+See /example/main.py for a working App Engine example
+
+## Testing
+
+Tested on Google App Engine Python SDK 1.6.3
+
+## Release History
+
+0.2 - (3/14/2012) Added internal serialization using json and __dict__
+0.1 - (2/20/2012) First public version
+
+## License
+
+Copyright (c) Fraser Harris, 2012
+No restrictions on usage.
